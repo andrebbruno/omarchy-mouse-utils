@@ -29,14 +29,27 @@ def test_the_socket_path_is_built_from_the_instance(tmp_path):
     assert socket_path(str(tmp_path), "abc123") == str(instance / ".socket.sock")
 
 
-def test_the_instance_is_worked_out_when_it_is_not_in_the_environment(tmp_path):
+def test_the_instance_is_worked_out_when_it_is_not_in_the_environment(tmp_path, monkeypatch):
+    # The environment wins when it has an answer, so this test has to take it away
+    # before it can check the fallback — inside a Hyprland session it is always set.
+    monkeypatch.delenv("HYPRLAND_INSTANCE_SIGNATURE", raising=False)
     instance = tmp_path / "hypr" / "onlyone"
     instance.mkdir(parents=True)
     (instance / ".socket.sock").write_text("", encoding="utf-8")
     assert socket_path(str(tmp_path), None).endswith(os.path.join("onlyone", ".socket.sock"))
 
 
-def test_no_hyprland_at_all_is_reported(tmp_path):
+def test_the_environment_wins_when_it_has_an_answer(tmp_path, monkeypatch):
+    monkeypatch.setenv("HYPRLAND_INSTANCE_SIGNATURE", "from-the-session")
+    instance = tmp_path / "hypr" / "from-the-session"
+    instance.mkdir(parents=True)
+    (instance / ".socket.sock").write_text("", encoding="utf-8")
+    (tmp_path / "hypr" / "another").mkdir()
+    assert "from-the-session" in socket_path(str(tmp_path), None)
+
+
+def test_no_hyprland_at_all_is_reported(tmp_path, monkeypatch):
+    monkeypatch.delenv("HYPRLAND_INSTANCE_SIGNATURE", raising=False)
     with pytest.raises(HyprlandError):
         socket_path(str(tmp_path), None)
 

@@ -12,7 +12,7 @@ optdepends=('libnotify: notifications'
 makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools')
 checkdepends=('python-pytest')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('85fee7b5751aeea08221a17bfd1d2725c663b21516371f55bf02a68298e74881')
 
 build() {
   cd "$pkgname-$pkgver"
